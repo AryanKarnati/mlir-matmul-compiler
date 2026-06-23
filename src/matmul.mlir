@@ -1,6 +1,9 @@
 // Declare a runtime function that prints an unranked memref of f32
 func.func private @printMemrefF32(memref<*xf32>)
 
+// creating an identity map
+#map_identity_2D = affine_map<(d0, d1) -> (d0, d1)>
+
 func.func @main() {
 
     // Create 3 variables called f1, f2, f3 and initialized them to 2.0, 3.0, 0.0 respectivly
@@ -16,6 +19,7 @@ func.func @main() {
     %m3 = memref.alloc() : memref<2x2xf32>
     %m0 = memref.alloc() : memref<2x2xf32>
     %output = memref.alloc() : memref<2x2xf32>
+    %relu_out = memref.alloc() : memref<2x2xf32>
 
     // Fills all matricies with values from previously decalred variables
     linalg.fill ins(%c1 : f32) outs(%m1 : memref<2x3xf32>)
@@ -30,8 +34,18 @@ func.func @main() {
     // Adds a bias 
     linalg.add ins(%m0, %m3 : memref<2x2xf32>, memref<2x2xf32>) outs(%output : memref<2x2xf32>)
 
+    // Adds the Relu activation function
+    linalg.generic {indexing_maps = [#map_identity_2D, #map_identity_2D], iterator_types = ["parallel", "parallel"]} 
+    ins(%output: memref<2x2xf32>) outs(%relu_out : memref<2x2xf32>) 
+    {
+        ^bb0(%in : f32, %out : f32):
+        %zero = arith.constant 0.0 : f32
+        %result = arith.maximumf %in, %zero : f32
+        linalg.yield %result : f32
+    }
+
     // Casting the rank 2 tensor to unranked for printing
-    %cast_m0 = memref.cast %output : memref<2x2xf32> to memref<*xf32>
+    %cast_m0 = memref.cast %relu_out : memref<2x2xf32> to memref<*xf32>
     call @printMemrefF32(%cast_m0) : (memref<*xf32>) -> ()
 
     // Deallocating memory
@@ -40,6 +54,7 @@ func.func @main() {
     memref.dealloc %m3 : memref<2x2xf32>
     memref.dealloc %m0 : memref<2x2xf32>
     memref.dealloc %output : memref<2x2xf32>
+    memref.dealloc %relu_out : memref<2x2xf32>
 
     return
 
