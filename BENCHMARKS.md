@@ -14,7 +14,12 @@
 - Notes: Fused matmul + bias + relu into single loop; eliminated memory round-trips
 
 ## Sprint 5 — Tiling
-(coming soon)
+- Matrix size: 512×512
+- Operation: `relu(A @ B + bias)` fused + tiled
+- Time: **0.574s**
+- Speedup vs. fusion: **2.16×**
+- Speedup vs. baseline: **17.7×**
+- Notes: Tiled loops to cache-friendly blocks with -affine-loop-tile
 
 ## Sprint 6 — Vectorization
 (coming soon)
