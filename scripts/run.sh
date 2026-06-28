@@ -43,6 +43,7 @@ echo
 "$MLIR_OPT" "$SRC" \
   -convert-linalg-to-loops \
   -linalg-fuse-elementwise-ops \
+  -affine-loop-tile \
   -convert-scf-to-cf \
   -expand-strided-metadata \
   -lower-affine \
