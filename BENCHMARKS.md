@@ -21,5 +21,3 @@
 - Speedup vs. baseline: **17.7×**
 - Notes: Tiled loops to cache-friendly blocks with -affine-loop-tile
 
-## Sprint 6 — Vectorization
-(coming soon)
